@@ -2,6 +2,7 @@ import sys
 
 import openai as openai
 
+from functions import Settings
 from interface import Interface
 
 
@@ -20,6 +21,7 @@ class Athena:
 
     def __init__(self):
         openai.api_key = "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"
+        self.request = Settings.get()
 
     def run(self, startup=False):
         if startup is True:
@@ -39,23 +41,8 @@ class Athena:
                 Interface.display_response(response)
     
     def create_request(self, query):
-        prompt_text = f'{self.chat_log}{self.restart_sequence}: {query}{self.start_sequence}:'
-        self.request = {
-            "model": "text-davinci-003",
-            "prompt": prompt_text,
-            "max_tokens": 512,
-            "temperature": 0.8,
-            "top_p": 1.0,
-            "n": 1,
-            "stream": False,
-            "logprobs": None,
-            "echo": False,
-            "stop": ["\n"],
-            "presence_penalty": 0.3,
-            "frequency_penalty": 0.0,
-            "best_of": 1,
-            "user": ""
-        }
+        prompt = f'{self.chat_log}{self.restart_sequence}: {query}{self.start_sequence}:'
+        self.request["prompt"] = prompt
 
     def run_request(self):
         response = openai.Completion.create(
