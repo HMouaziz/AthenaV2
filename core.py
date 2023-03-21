@@ -17,7 +17,7 @@ class Athena:
                      "improving her existing knowledge base.\n\nUser: Hello, who are you?\nAthena: I am Athena. " \
                      "collector and guardian of knowledge. How can I help you?"
     request = {}
-    chat_log = None
+    chat_log = []
 
     def __init__(self):
         openai.api_key = "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"
@@ -37,11 +37,11 @@ class Athena:
             else:
                 self.create_request(query)
                 response = self.run_request()
-                self.append_chat_log(query, response['choices'][0]['text'])
+                self.append_chat_log(query, response)
                 Interface.display_response(response)
     
     def create_request(self, query):
-        prompt = f'{self.chat_log}{self.restart_sequence}: {query}{self.start_sequence}:'
+        prompt = f'{" ".join(self.chat_log)}{self.restart_sequence}: {query}{self.start_sequence}:'
         self.request["prompt"] = prompt
 
     def run_request(self):
@@ -63,7 +63,12 @@ class Athena:
         )
         return response
 
-    def append_chat_log(self, query, answer):
-        if self.chat_log is None:
-            self.chat_log = self.session_prompt
-        self.chat_log = f'{self.chat_log}{self.restart_sequence} {query}{self.start_sequence}{answer}'
+    def append_chat_log(self, query, response):
+        answer = response["choices"][0]["text"]
+        log_size = response["usage"]["total_tokens"]
+        if not self.chat_log:
+            self.chat_log.append(self.session_prompt)
+        if log_size > 500:
+            del self.chat_log[1]
+        self.chat_log.append(f'{self.restart_sequence} {query}{self.start_sequence}{answer}')
+
