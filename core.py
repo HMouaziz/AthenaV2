@@ -7,8 +7,9 @@ from interface import Interface
 
 
 class Athena:
-    exit_conditions = ("/q", "quit", "exit", "-q")
+    exit_conditions = ("/q", "quit", "exit", "-q", "bye")
     settings_conditions = ("settings", "open settings")
+    log_conditions = ("erase last logged request", "delete previous log", "delete last log", "/del")
     start_sequence = "\nAthena:"
     restart_sequence = "\n\nUser:"
     session_prompt = "You are talking to Athena, GPT3 bot modelled after Athena an ancient Greek goddess associated " \
@@ -18,6 +19,7 @@ class Athena:
                      "collector and guardian of knowledge. How can I help you?"
     request = {}
     chat_log = []
+    log_size = 0
 
     def __init__(self):
         openai.api_key = "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"
@@ -34,6 +36,8 @@ class Athena:
                 sys.exit(1)
             elif query in self.settings_conditions:
                 Interface.settings_ui()
+            elif query in self.log_conditions:
+                self.erase_last_log()
             else:
                 self.create_request(query)
                 response = self.run_request()
@@ -45,10 +49,11 @@ class Athena:
         self.request["prompt"] = prompt
 
     def run_request(self):
+        max_t = self.request['max_tokens']
         response = openai.Completion.create(
             model=self.request['model'],
             prompt=self.request['prompt'],
-            max_tokens=self.request['max_tokens'],
+            max_tokens=max_t - self.log_size,
             temperature=self.request['temperature'],
             top_p=self.request['top_p'],
             n=self.request['n'],
@@ -65,10 +70,13 @@ class Athena:
 
     def append_chat_log(self, query, response):
         answer = response["choices"][0]["text"]
-        log_size = response["usage"]["total_tokens"]
+        self.log_size = response["usage"]["total_tokens"]
         if not self.chat_log:
             self.chat_log.append(self.session_prompt)
-        if log_size > 500:
+        if self.log_size > 1000:
             del self.chat_log[1]
         self.chat_log.append(f'{self.restart_sequence} {query}{self.start_sequence}{answer}')
+
+    def erase_last_log(self):
+        del self.chat_log[-1]
 
