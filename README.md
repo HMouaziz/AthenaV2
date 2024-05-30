@@ -140,4 +140,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [OpenAI](https://www.openai.com/) for providing the GPT-3 model.
 
-For any questions or contributions, please open an issue or submit a pull request on the GitHub repository.
+Developed by Halim Mouaziz @ project-hephaestus.com © 2024
