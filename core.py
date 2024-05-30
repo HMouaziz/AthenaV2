@@ -22,7 +22,7 @@ class Athena:
     log_size = 0
 
     def __init__(self):
-        openai.api_key = # SET API KEY
+        openai.api_key = None # SET API KEY
         self.request = Settings.get()
 
     def run(self, startup=False):
